@@ -1,27 +1,46 @@
-# App template
+# OWL Income
 
-The starting point for every [Collegica](https://www.collegica.org) app: a
-small tool that runs in a browser tab, on its own or inside a page on
-collegica.org, with nothing uploaded.
+Turn savings into a retirement paycheque, with Canada's 2026 rules. Enter
+what you spend, your CPP and OAS, a workplace pension and your RRSP, TFSA and
+non-registered savings, and see, year by year to the age you plan for:
 
-The example app is a tally that remembers its count. Replace it with yours.
+- **your withdrawal rate**: spending not covered by CPP, OAS or a pension,
+  divided by savings, beside the 3.5–4% rule of thumb;
+- **whether essentials last** in a typical market, a poor one (the worst
+  quarter of 30-year outcomes), and across 500 random markets;
+- **tax each year**: federal and Ontario, BC or Alberta, with the age and
+  pension amounts, RRIF minimums and the OAS clawback;
+- **choices compared side by side**: CPP at 60, 65 or 70; which account to
+  draw first (RRSP up to the lowest bracket, non-registered first, or a
+  little from each); fixed spending, Vanguard's flexible rule (+5% / −2.5% a
+  year at most) or Guyton-Klinger guardrails.
 
-## Start an app
+It follows the seven steps of Vanguard's *Principles for retirement income*
+(2026), in Canadian terms. Everything is calculated in your browser tab.
+**Nothing is uploaded**; the plan is kept on this device only if you ask.
 
-1. On GitHub, **Use this template** → create `Collegica/<slug>` (or your own
-   copy under your account).
-2. Rename it, once:
+**Education, not advice.** One person, Ontario, BC or Alberta, in 2026
+dollars. Not modelled yet: couples and pension splitting, GIS, Quebec,
+dividends, annuities. Each is listed under [Known gaps](#known-gaps).
 
-   ```bash
-   npm run rename -- my-app "My App"
-   ```
+## How it works
 
-   The slug is the app's name everywhere: the custom element `<my-app>`, the
-   path `/apps/my-app/` on collegica.org, the storage prefix
-   `collegica:my-app:` and the release file `my-app-web.tar.gz`. It must
-   contain a hyphen, because custom element names do.
-3. Write the app in `src/app.js`, and fill in `app.json`: the description, and
-   the privacy line that tells people where their data goes.
+| File | What it holds |
+|---|---|
+| `src/rules-2026.js` | Every 2026 figure, with its source: CPP and OAS adjustments, the clawback threshold, RRIF factors, federal and provincial brackets and credits, FP Canada's 2026 projection assumptions |
+| `src/tax.js` | One person's tax for one year, following CRA's T4127 formulas |
+| `src/engine.js` | The projection: guaranteed income, RRIF minimums, withdrawals by order, tax, spending rules, surplus saved to the TFSA; Monte Carlo on FP Canada's returns and volatilities |
+| `src/app.js` | The form and the results |
+
+The amounts are in today's dollars: brackets, credits and benefits rise with
+inflation, so holding them constant is the same thing. Returns are FP
+Canada's 2026 guidelines (equities split equally between Canada, the US and
+international) minus your fees.
+
+The tests (`test/engine.test.mjs`) check the engine against published
+numbers: canada.ca's CPP and OAS adjustments and clawback example, CRA's
+RRIF table, tax worked by hand, and Vanguard's Figures 2 and 4 reproduced to
+the dollar; plus invariants on 200 random plans.
 
 ## Run and test
 
@@ -63,11 +82,13 @@ when the site pins the new tag.
 
 ## Known gaps
 
-- **iPhone home-screen icon.** iOS ignores SVG icons in the manifest. Add a
-  180 × 180 PNG and `<link rel="apple-touch-icon" href="icon-180.png">` to
-  `index.html` (and to `BUNDLE` in `scripts/bundle.mjs`).
-- **No browser tests yet.** The contract is checked by reading the files;
-  nothing yet clicks through the app in a real browser in CI.
+- **Couples**: pension income splitting, survivor benefits and joint
+  horizons are next.
+- **GIS** for low incomes, **Quebec** (QPP and Quebec tax), the territories.
+- **Annuities**, dividends and the dividend tax credit, medical expenses.
+- **2027 rules**: add `src/rules-2027.js` when CRA and Service Canada
+  publish them.
+- **iPhone home-screen icon**: iOS ignores SVG icons; a 180 × 180 PNG is needed.
 
 ## License
 

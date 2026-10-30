@@ -1,7 +1,7 @@
 {
   "id": "./",
-  "name": "App template",
-  "short_name": "App template",
+  "name": "OWL Income",
+  "short_name": "OWL Income",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

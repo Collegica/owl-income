@@ -1,10 +1,10 @@
 {
-  "name": "app-template",
+  "name": "owl-income",
   "version": "0.0.0",
   "private": true,
   "type": "module",
   "license": "MIT",
-  "description": "The starting point for every Collegica app: a web component, a standalone page, offline support and the embedding contract, with no dependencies.",
+  "description": "Turn savings into a retirement paycheque, with Canada's 2026 rules. Runs in the browser; nothing uploaded.",
   "scripts": {
     "start": "node scripts/serve.mjs",
     "test": "node --test",

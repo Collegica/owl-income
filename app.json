@@ -1,8 +1,8 @@
 {
-  "slug": "app-template",
-  "title": "App template",
-  "description": "A tally that remembers where you left it: the smallest Collegica app, and the starting point for every other.",
-  "privacy": "Nothing leaves the tab.",
+  "slug": "owl-income",
+  "title": "OWL Income",
+  "description": "Turn savings into a retirement paycheque in Canada: CPP and OAS timing, RRIF minimums, tax and the OAS clawback in Ontario, BC and Alberta, withdrawal order and spending rules compared, in typical, poor and 500 random markets.",
+  "privacy": "Everything is calculated in this tab. Nothing is uploaded; the plan is kept on this device only if you tick Remember.",
   "origins": [],
   "embed": "component"
 }

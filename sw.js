@@ -4,7 +4,7 @@
 // own folder (/apps/<slug>/app/ on collegica.org) and nothing above it.
 // scripts/build.mjs replaces VERSION with the release tag.
 
-const SLUG = 'app-template';
+const SLUG = 'owl-income';
 const CACHE = `collegica-${SLUG}-VERSION`;
 
 self.addEventListener('install', () => self.skipWaiting());
