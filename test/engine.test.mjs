@@ -135,3 +135,19 @@ test('Monte Carlo is repeatable with a seed, and assumptions are sensible', () =
   assert.ok(real > 0.015 && real < 0.04, `real ${real}`);
   assert.ok(sd > 0.06 && sd < 0.1, `sd ${sd}`);
 });
+
+test('flexible rules move spending, not the draw: never above target in year one, never below needs while money lasts', () => {
+  const plan = { age: 65, horizon: 96, needs: 36000, wants: 12000, contingency: 25000, cpp65Monthly: 858,
+    rrsp: 500000, tfsa: 100000, nonReg: 150000, order: 'meltdown' };
+  for (const rule of ['vanguard', 'guardrails']) {
+    for (const ret of [-0.01, 0.0217, 0.06]) {
+      const { rows } = project({ ...plan, rule }, [ret]);
+      near(rows[0].spending, 48000, 1, `${rule} year one`);
+      assert.ok(rows[0].saved > 0, 'the meltdown surplus is saved, not spent');
+      for (const r of rows) if (r.total > 1000) assert.ok(r.spending + 1 >= 36000, `${rule} at ${ret}: ${r.spending} at ${r.age}`);
+      for (let k = 1; k < rows.length && rule === 'vanguard'; k++) {
+        if (rows[k].total > 1000 && rows[k].spending > 36001) assert.ok(rows[k].spending <= rows[k - 1].spending * 1.05 + 1, 'up 5% at most');
+      }
+    }
+  }
+});

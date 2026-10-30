@@ -121,7 +121,7 @@ export function project(plan, returns) {
   const firstWithdrawalRate = portfolio0 > 0 ? Math.max(0, target - (g0.cpp + g0.oas + g0.db)) / portfolio0 : Infinity;
 
   const rows = [];
-  let essentialsFailAge = null, prevDraw = null, prevReturn = 0, wr0 = null;
+  let essentialsFailAge = null, prevSpend = null, prevReturn = 0, wr0 = null;
 
   for (let i = 0; i < years; i++) {
     const age = p.age + i;
@@ -158,34 +158,33 @@ export function project(plan, returns) {
     };
     const netCash = x => { const d = plan(x); return fixedIncome + rrifMin + d.n + d.rr + d.t - yearTax(d).total; };
 
-    // The spending rule decides the target: after-tax spending (fixed), or the
-    // gross amount drawn from the portfolio (Vanguard cap, guardrails).
+    // The spending rule sets this year's after-tax spending. Fixed: the target,
+    // always. The flexible rules (our implementations) move it with the
+    // portfolio, measured by the withdrawal rate (spending − guaranteed income)
+    // ÷ savings; they trim wants, never needs, while there is money to draw.
     const balance = nonReg + tfsa + rrsp;
     const room0 = nonReg + Math.max(0, rrsp - rrifMin) + tfsa;
-    let extra;
-    if (p.rule === 'fixed') {
-      extra = solve(netCash, target, room0);
-    } else {
-      if (prevDraw === null) {
-        extra = solve(netCash, target, room0);
-        prevDraw = rrifMin + extra;
-        wr0 = balance > 0 ? prevDraw / balance : 0;
+    let want = target;
+    if (p.rule !== 'fixed') {
+      if (prevSpend === null) {
+        wr0 = balance > 0 ? Math.max(0, target - fixedIncome) / balance : 0;
+      } else if (p.rule === 'vanguard') {
+        // Vanguard: aim at the starting withdrawal rate on today's balance,
+        // moving at most +5% or −2.5% a year in real terms.
+        const aim = fixedIncome + wr0 * balance;
+        want = Math.min(prevSpend * 1.05, Math.max(prevSpend * 0.975, aim));
       } else {
-        let draw;
-        if (p.rule === 'vanguard') {
-          draw = Math.min(prevDraw * 1.05, Math.max(prevDraw * 0.975, wr0 * balance));
-        } else {
-          draw = prevDraw;
-          const wr = balance > 0 ? draw / balance : Infinity;
-          if (prevReturn < 0 && wr > wr0) draw /= 1 + PAG.inflation; // skip the inflation raise
-          const wrNow = balance > 0 ? draw / balance : Infinity;
-          if (wrNow > wr0 * 1.2 && years - i > 15) draw *= 0.9; // capital preservation
-          else if (wrNow < wr0 * 0.8) draw *= 1.1; // prosperity
-        }
-        prevDraw = draw;
-        extra = Math.min(room0, Math.max(0, draw - rrifMin));
+        // Guyton-Klinger guardrails.
+        want = prevSpend;
+        const rate = s => balance > 0 ? Math.max(0, s - fixedIncome) / balance : Infinity;
+        if (prevReturn < 0 && rate(want) > wr0) want /= 1 + PAG.inflation; // skip the inflation raise
+        if (rate(want) > wr0 * 1.2 && years - i > 15) want *= 0.9; // capital preservation
+        else if (rate(want) < wr0 * 0.8) want *= 1.1; // prosperity
       }
+      want = Math.max(p.needs, want);
+      prevSpend = want;
     }
+    const extra = solve(netCash, want, room0);
 
     const d = plan(extra);
     const tax = yearTax(d);
@@ -193,8 +192,8 @@ export function project(plan, returns) {
     let spending = gross - tax.total;
     // Anything above the target (a large RRIF minimum, say) is saved: TFSA first.
     let saved = 0;
-    if (p.rule === 'fixed' && spending > target + 1) {
-      saved = spending - target; spending = target;
+    if (spending > want + 1) {
+      saved = spending - want; spending = want;
     }
     const realised = nonReg > 0 ? d.n * Math.max(0, 1 - acb / nonReg) : 0;
     acb -= d.n - realised;

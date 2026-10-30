@@ -43,7 +43,7 @@ const FIELDS = [
     ['feePct', 'Fees a year (%)', 'number', 0.5, { min: 0, max: 3, step: 0.05 }],
   ] },
   { step: '5–6. Your choices', items: [
-    ['rule', 'Spending', 'select', 'fixed', { options: [['fixed', 'The same every year'], ['vanguard', 'Flexible: up 5% or down 2.5% at most a year (Vanguard)'], ['guardrails', 'Guardrails: cut or raise 10% when far off track (Guyton-Klinger)']] }],
+    ['rule', 'Spending', 'select', 'fixed', { options: [['fixed', 'The same every year'], ['vanguard', 'Flexible: up 5% or down 2.5% at most a year (Vanguard)'], ['guardrails', 'Guardrails: cut or raise 10% when far off track (Guyton-Klinger)']], hint: 'The flexible rules follow your savings and trim wants, never needs, while there is money to draw.' }],
     ['order', 'Which account first', 'select', 'meltdown', { options: [['meltdown', 'RRSP up to the lowest tax bracket first (“meltdown”)'], ['conventional', 'Non-registered, then RRSP, then TFSA'], ['pro-rata', 'A little from each']] }],
     ['rrifAge', 'Turn the RRSP into a RRIF at', 'number', 71, { min: 55, max: 71, hint: 'Required by the end of the year you turn 71. A RRIF from 65 unlocks the $2,000 pension amount.' }],
   ] },
@@ -164,11 +164,12 @@ class OwlIncome extends CollegicaApp {
 
     const compare = (label, variants) => `
       <table><caption>${esc(label)}</caption>
-        <thead><tr><th scope="col"></th><th scope="col">Essentials</th><th scope="col">Spending, total</th><th scope="col">Tax, total</th><th scope="col">Left at ${p.horizon}</th></tr></thead>
+        <thead><tr><th scope="col"></th><th scope="col">Essentials</th><th scope="col">Years below your target</th><th scope="col">Spending, total</th><th scope="col">Tax, total</th><th scope="col">Left at ${p.horizon}</th></tr></thead>
         <tbody>${variants.map(([name, plan]) => {
           const r = project(plan, [sc.typical]);
           const spent = r.rows.reduce((s, x) => s + x.spending, 0);
-          return `<tr><td>${esc(name)}</td><td>${r.essentialsFailAge === null ? 'covered' : 'short at ' + r.essentialsFailAge}</td><td>${money(spent)}</td><td>${money(r.lifetimeTax)}</td><td>${money(r.finalWealth)}</td></tr>`;
+          const below = r.rows.filter(x => x.spending < target - 1).length;
+          return `<tr><td>${esc(name)}</td><td>${r.essentialsFailAge === null ? 'covered' : 'short at ' + r.essentialsFailAge}</td><td>${below} of ${r.rows.length}</td><td>${money(spent)}</td><td>${money(r.lifetimeTax)}</td><td>${money(r.finalWealth)}</td></tr>`;
         }).join('')}</tbody></table>`;
 
     this.out.innerHTML = `
