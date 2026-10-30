@@ -83,7 +83,7 @@ class OwlIncome extends CollegicaApp {
         .card .note { font-size: .82rem; }
         .ok { color: #2E6B4F; } .warn { color: var(--cg-accent-text, #8F5410); } .bad { color: #9B2C2C; }
         @media (prefers-color-scheme: dark) { .ok { color: #7FC8A0; } .bad { color: #F2A0A0; } }
-        figure { margin: 1rem 0; } figcaption { font-size: .85rem; color: var(--cg-text-muted, #4C5782); }
+        figure { margin: 1rem 0; max-width: 48rem; } figcaption { font-size: .85rem; color: var(--cg-text-muted, #4C5782); }
         svg text { font: 11px var(--cg-sans, system-ui, sans-serif); fill: var(--cg-text-muted, #4C5782); }
         .wrap { overflow-x: auto; }
         table { border-collapse: collapse; width: 100%; font-size: .88rem; }
